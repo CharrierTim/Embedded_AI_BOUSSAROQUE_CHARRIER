@@ -1,7 +1,7 @@
 
 # Wine Quality Prediction
 
-Embedded AI project aiming to implement a Wine Quality Prediction on STM32L4R9AI.
+An embedded AI project that aims to implement Wine Quality Prediction on the STM32L4R9AI platform.
 
 ## Authors
 
