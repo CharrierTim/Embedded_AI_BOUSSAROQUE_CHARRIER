@@ -28,8 +28,16 @@ class Dataset:
         labels_vectors = [label_to_vector(x) for x in self.data[:, -1]]
         np.save(f'{output_filename}_Y', labels_vectors)
 
+    def split(self, test_proportion=0.2) -> tuple:
+        np.random.shuffle(self.data)
+        split_index = int((1-test_proportion) * self.data.shape[0])
+        X_train, X_test = self.data[:split_index, :-1], self.data[split_index:, :-1]
+        Y_train, Y_test = np.array([label_to_vector(x) for x in self.data[:split_index, -1]]), np.array([label_to_vector(x) for x in self.data[split_index:, -1]])
+        return X_train, X_test, Y_train, Y_test
 
 
 if __name__ == '__main__':
     dataset = Dataset('winequalityN.csv')
     dataset.save('winequality')
+    X_train, X_test, Y_train, Y_test = dataset.split()
+    print(X_train.shape, X_test.shape, Y_train.shape, Y_test.shape)
