@@ -10,12 +10,27 @@ def label_to_vector(x: float) -> list:
 
 class Dataset:
     
-    def __init__(self, filename: str) -> None:
-        with open(filename, 'r') as f:
-            reader = csv.reader(f)
-            self.data = [row for row in reader if reader.line_num != 1]
-            self.data = np.array(self.data)
-            self.format()
+    class DatasetHandler:
+        """
+        A class to handle datasets.
+
+        Attributes:
+        -----------
+        data : numpy.ndarray
+            The dataset as a numpy array.
+
+        Methods:
+        --------
+        __init__(filename: str) -> None
+            Initializes the DatasetHandler object by reading the dataset from a file and formatting it.
+        """
+
+        def __init__(self, filename: str) -> None:
+            with open(filename, 'r') as f:
+                reader = csv.reader(f)
+                self.data = [row for row in reader if reader.line_num != 1]
+                self.data = np.array(self.data)
+                self.format()
     
     def format(self) -> None:
         self.data[:, 0] = text_to_float(self.data[:, 0])
@@ -31,5 +46,8 @@ class Dataset:
 
 
 if __name__ == '__main__':
-    dataset = Dataset('winequalityN.csv')
-    dataset.save('winequality')
+    print('Formatting dataset...')
+    dataset = Dataset('./dataset/winequalityN.csv')
+    print('Saving dataset...')
+    dataset.save('./dataset/winequality')
+    print('Done.')
