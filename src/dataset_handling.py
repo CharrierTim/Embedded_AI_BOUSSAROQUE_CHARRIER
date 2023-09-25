@@ -46,15 +46,10 @@ class Dataset:
         np.random.shuffle(self.data)
         split_index = int((1-test_proportion) * self.data.shape[0])
         X_train, X_test = self.data[:split_index, :-1], self.data[split_index:, :-1]
-        # Y_train, Y_test = np.array([label_to_vector(x) for x in self.data[:split_index, -1]]), np.array([label_to_vector(x) for x in self.data[split_index:, -1]])
         Y_train, Y_test = self.data[:split_index, -1], self.data[split_index:, -1]        
         return X_train, X_test, Y_train, Y_test
 
 
-
-if __name__ == '__main__':
-    print('Formatting dataset...')
-    dataset = Dataset('./dataset/winequalityN.csv')
-    print('Saving dataset...')
-    dataset.save('./dataset/winequality')
-    print('Done.')
+def saveDatasets(X, Y, filename):
+    np.save(f'{filename}_X.npy', X)
+    np.save(f'{filename}_Y.npy', Y)
