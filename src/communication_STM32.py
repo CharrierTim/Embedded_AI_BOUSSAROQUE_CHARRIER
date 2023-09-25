@@ -12,14 +12,15 @@ def synchronise_UART(serial_port):
 
 def send_inputs_to_STM32(inputs, serial_port):
     inputs = inputs.astype(np.float16) # Convert inputs to float16
+    buffer = b""
     for x in inputs:
-        # serial_port.write(x)
-        pass
-
+        buffer += x.tobytes()
+    serial_port.write(buffer)
+    
 def evaluate_model_on_STM32(iterations, serial_port):
     error = 0
     for i in range(iterations):
-        print(f"----- Iteration {i} -----")
+        print(f"----- Iteration {i+1} -----")
         send_inputs_to_STM32(X_test[i], serial_port)
         # Read output
         output = 5
