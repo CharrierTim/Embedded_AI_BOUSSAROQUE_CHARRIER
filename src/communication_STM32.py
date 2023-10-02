@@ -18,8 +18,8 @@ def send_inputs_to_STM32(inputs, serial_port):
     serial_port.write(buffer)
 
 def read_output_from_STM32(serial_port):
-    output = serial_port.read(1)
-    return output
+    output = serial_port.read(2)
+    return np.frombuffer(output, dtype=np.float16)[0]
     
 def evaluate_model_on_STM32(iterations, serial_port):
     error = 0
