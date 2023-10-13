@@ -34,7 +34,7 @@ class Dataset:
     def format(self) -> None:
         self.data[:, 0] = text_to_float(self.data[:, 0])
         self.data = remove_empty(self.data)
-        self.data = self.data.astype('float32')
+        self.data = self.data.astype('float16')
 
     def save(self, output_filename) -> None:
         np.save(output_filename, self.data)
@@ -48,7 +48,7 @@ class Dataset:
         X_train, X_test = self.data[:split_index, :-1], self.data[split_index:, :-1]
         Y_train, Y_test = self.data[:split_index, -1], self.data[split_index:, -1]        
         return X_train, X_test, Y_train, Y_test
-
+      
 
 def saveDatasets(X, Y, filename):
     np.save(f'{filename}_X.npy', X)
