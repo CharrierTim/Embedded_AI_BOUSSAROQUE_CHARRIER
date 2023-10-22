@@ -30,19 +30,19 @@ class Dataset:
         Initializes the DatasetHandler object by reading the dataset from a file and formatting it.
     """
 
-    def __init__(self, filename: str, enable_data_augmentation=False) -> None:
+    def __init__(self, filename: str, data_augmentation_noise=None) -> None:
         with open(filename, 'r') as f:
             reader = csv.reader(f)
             self.data = [row for row in reader if reader.line_num != 1]
             self.data = np.array(self.data)
-            self.format(enable_data_augmentation)
+            self.format(data_augmentation_noise)
 
-    def format(self, enable_data_augmentation) -> None:
-        self.data[:, 0] = text_to_float(self.data[:, 0])
+    def format(self, data_augmentation_noise) -> None:
         self.data = remove_empty(self.data)
+        self.data[:, 0] = text_to_float(self.data[:, 0])
         self.data = self.data.astype('float16')
-        if enable_data_augmentation:
-            self.data_augmentation()
+        if data_augmentation_noise is not None:
+            self.data_augmentation(data_augmentation_noise)
 
     def save(self, output_filename) -> None:
         """
@@ -79,35 +79,28 @@ class Dataset:
                                     1], self.data[split_index:, -1]
         return X_train, X_test, Y_train, Y_test
 
-    def data_augmentation(self, noise=0.05) -> None:
-        """
-        Applies data augmentation to the dataset by adding new samples with random noise.
+    def data_augmentation(self, noise) -> None:
+        factors = [1.19, 1.19, 1.19, 1.0, 2.22, 2.22, 2.22]
+        samples = [self.data[self.data[:, -1] == i] for i in range(3, 10)]
+        number_of_samples = [s.shape[0] for s in samples]
+        samples_to_add = [int((f-1)*n) for f, n in zip(factors, number_of_samples)]
 
-        Args:
-            noise (float): the standard deviation of the normal distribution used to generate the noise.
-                Defaults to 0.05.
-
-        Returns:
-            None
-        """
-        factors = [30, 7.5, 1, 1, 1.5, 8, 150]
-
-        for quality in range(3, 10):
-            if factors[quality-3] != 1:
-                f = factors[quality-3]
-                n_samples = int(
-                    (f-1) * len(self.data[self.data[:, -1] == quality]))
-                new_samples = np.zeros((n_samples, self.data.shape[1]))
-                new_samples[:, -1] = quality
-                for i in range(n_samples):
-                    # Add random noise to the sample
-                    sample = self.data[np.random.randint(
-                        0, len(self.data[self.data[:, -1] == quality])), :-1]
-                    noise_values = np.random.normal(1, noise, sample.shape)
-                    new_samples[i, :-1] = sample * noise_values
-                    new_samples[i, :-
-                                1] = np.clip(new_samples[i, :-1], 0, np.inf)
-                self.data = np.concatenate((self.data, new_samples), axis=0)
+        def augment_scalar(x, noise):
+            return x + np.random.normal(0, noise)
+        
+        standard_deviations = [np.std(self.data[:, i]) for i in range(12)]
+        standard_deviations = [s if s != np.inf else 0 for s in standard_deviations]
+        for i, n in enumerate(samples_to_add):
+            new_samples = np.zeros((n, 13))
+            for j in range(n):
+                base = samples[i][np.random.randint(0, number_of_samples[i])]
+                for k in range(12):
+                    new_samples[j, k] = max(augment_scalar(base[k], noise*standard_deviations[k]), 0)
+                new_samples[j, 12] = base[12]
+            self.data = np.concatenate((self.data, np.array(new_samples)))
+                
+            
+            
 
     def plot_label_distribution(self, color="blue", title="Label Distribution") -> None:
         """
