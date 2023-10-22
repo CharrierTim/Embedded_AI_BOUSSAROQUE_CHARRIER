@@ -111,7 +111,7 @@ class Dataset:
 
     def plot_label_distribution(self, color="blue", title="Label Distribution") -> None:
         """
-        Plot a histogram of the distribution of labels in the dataset.
+        Plot a histogram of the distribution of labels in the dataset using Matplotlib.
 
         Args:
             color (str): Color for the histogram bars. Default is "blue."
@@ -120,34 +120,34 @@ class Dataset:
         Returns:
             None
         """
-        # Set the style to a white background with gridlines
-        sns.set_style("whitegrid")
-
         # Extract labels from the dataset
         labels = self.data[:, -1]
 
         # Create a figure and axis with a larger size
-        plt.figure(figsize=(10, 6))
+        fig, ax = plt.subplots(figsize=(10, 6))
 
         # Plot the distribution of labels
-        sns.histplot(data=labels, bins=7, color=color, kde=False)
+        bins = np.arange(3, 11) - 0.5  # Adjust bins for better alignment
+        ax.hist(labels, bins=bins, color=color,
+                edgecolor='black', alpha=0.7, rwidth=0.8)
 
         # Set the title and axis labels
-        plt.title(title, fontsize=16)
-        plt.xlabel('Label', fontsize=12)
-        plt.ylabel('Count', fontsize=12)
+        ax.set_title(title, fontsize=16)
+        ax.set_xlabel('Label', fontsize=12)
+        ax.set_ylabel('Count', fontsize=12)
 
         # Customize x-axis for better readability
-        plt.xticks(np.arange(3, 10), labels=[str(i) for i in range(3, 10)])
+        ax.set_xticks(np.arange(3, 10))
+        ax.set_xticklabels([str(i) for i in range(3, 10)])
 
         # Add labels & counts above the bars
         unique_labels, label_counts = np.unique(labels, return_counts=True)
         for label, count in zip(unique_labels, label_counts):
-            plt.text(label, count, str(count),
-                     ha='center', va='bottom', fontsize=12)
+            ax.text(label, count, str(count),
+                    ha='center', va='bottom', fontsize=12)
 
         # Add grid lines to both axes
-        plt.grid(True, linestyle='--', alpha=0.6)
+        ax.grid(axis='y', linestyle='--', alpha=0.6)
 
         # Show the plot
         plt.show()
