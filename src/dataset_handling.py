@@ -28,6 +28,12 @@ class Dataset:
     --------
     __init__(filename: str) -> None
         Initializes the DatasetHandler object by reading the dataset from a file and formatting it.
+    format() -> None
+        Formats the dataset by removing empty values and converting the labels to vectors.
+    split(test_proportion: float) -> tuple
+        Splits the dataset into training and testing sets.
+    data_augmentation(noise: float) -> None
+        Augments the dataset by adding noise to the data.
     """
 
     def __init__(self, filename: str, data_augmentation_noise=None) -> None:
@@ -43,21 +49,6 @@ class Dataset:
         self.data = self.data.astype('float16')
         if data_augmentation_noise is not None:
             self.data_augmentation(data_augmentation_noise)
-
-    def save(self, output_filename) -> None:
-        """
-        Saves the dataset to disk in the specified format.
-
-        Args:
-            output_filename (str): The name of the file to save the dataset to.
-
-        Returns:
-            None
-        """
-        np.save(output_filename, self.data)
-        np.save(f'{output_filename}_X', self.data[:, :-1])
-        labels_vectors = [label_to_vector(x) for x in self.data[:, -1]]
-        np.save(f'{output_filename}_Y', labels_vectors)
 
     def split(self, test_proportion=0.15) -> tuple:
         """
@@ -83,67 +74,96 @@ class Dataset:
         factors = [1.19, 1.19, 1.19, 1.0, 2.22, 2.22, 2.22]
         samples = [self.data[self.data[:, -1] == i] for i in range(3, 10)]
         number_of_samples = [s.shape[0] for s in samples]
-        samples_to_add = [int((f-1)*n) for f, n in zip(factors, number_of_samples)]
+        samples_to_add = [int((f-1)*n)
+                          for f, n in zip(factors, number_of_samples)]
 
         def augment_scalar(x, noise):
             return x + np.random.normal(0, noise)
-        
+
         standard_deviations = [np.std(self.data[:, i]) for i in range(12)]
-        standard_deviations = [s if s != np.inf else 0 for s in standard_deviations]
+        standard_deviations = [
+            s if s != np.inf else 0 for s in standard_deviations]
         for i, n in enumerate(samples_to_add):
             new_samples = np.zeros((n, 13))
             for j in range(n):
                 base = samples[i][np.random.randint(0, number_of_samples[i])]
                 for k in range(12):
-                    new_samples[j, k] = max(augment_scalar(base[k], noise*standard_deviations[k]), 0)
+                    new_samples[j, k] = max(augment_scalar(
+                        base[k], noise*standard_deviations[k]), 0)
                 new_samples[j, 12] = base[12]
             self.data = np.concatenate((self.data, np.array(new_samples)))
-                
-            
-            
 
-    def plot_label_distribution(self, color="blue", title="Label Distribution") -> None:
-        """
-        Plot a histogram of the distribution of labels in the dataset using Matplotlib.
 
-        Args:
-            color (str): Color for the histogram bars. Default is "blue."
-            title (str): Title for the plot. Default is "Label Distribution."
+def plot_label_distribution(x, y_tr, y_te, color_tr="blue", color_te="red", title="Wine Quality Label Distribution"):
+    """
+    Plot a bar chart of the distribution of labels in the dataset using Matplotlib.
 
-        Returns:
-            None
-        """
-        # Extract labels from the dataset
-        labels = self.data[:, -1]
+    Args:
+        x (list): List of x-axis values.
+        y_tr (list): List of y-axis values for the training set.
+        y_te (list): List of y-axis values for the test set.
+        color_tr (str): Color for the training set bars. Default is "blue."
+        color_te (str): Color for the test set bars. Default is "red."
+        title (str): Title for the plot. Default is "Label Distribution."
 
-        # Create a figure and axis with a larger size
-        fig, ax = plt.subplots(figsize=(10, 6))
+    Returns:
+        None
+    """
+    plt.rcParams.update({'font.size': 14})
 
-        # Plot the distribution of labels
-        bins = np.arange(3, 11) - 0.5  # Adjust bins for better alignment
-        ax.hist(labels, bins=bins, color=color,
-                edgecolor='black', alpha=0.7, rwidth=0.8)
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.bar(x, y_tr, color=color_tr, label='Train', alpha=0.7)
+    ax.bar(x, y_te, color=color_te, label='Test', alpha=0.7)
 
-        # Set the title and axis labels
-        ax.set_title(title, fontsize=16)
-        ax.set_xlabel('Label', fontsize=12)
-        ax.set_ylabel('Count', fontsize=12)
+    ax.set_title(title, fontsize=20, fontweight='bold')
+    ax.set_xlabel('Label', fontsize=16, fontweight='bold')
+    ax.set_ylabel('Count', fontsize=16, fontweight='bold')
 
-        # Customize x-axis for better readability
-        ax.set_xticks(np.arange(3, 10))
-        ax.set_xticklabels([str(i) for i in range(3, 10)])
+    # Add labels & counts above the bars
+    for i, (tr, te) in enumerate(zip(y_tr, y_te)):
+        ax.text(i, max(tr, te), f"{tr}/{te}",
+                ha='center', va='bottom', fontsize=14, fontweight='bold')
 
-        # Add labels & counts above the bars
-        unique_labels, label_counts = np.unique(labels, return_counts=True)
-        for label, count in zip(unique_labels, label_counts):
-            ax.text(label, count, str(count),
-                    ha='center', va='bottom', fontsize=12)
+    ax.legend(fontsize=14, loc='lower right')
+    ax.grid(axis='y', linestyle='--', alpha=0.6)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
 
-        # Add grid lines to both axes
-        ax.grid(axis='y', linestyle='--', alpha=0.6)
+    ax.tick_params(axis='both', which='major', labelsize=14)
 
-        # Show the plot
-        plt.show()
+    plt.show()
+
+
+def plot_history(history, color_loss="blue", color_val="red"):
+    """
+    Plot the training and validation accuracy and loss curves for a Keras model.
+
+    Args:
+        history (keras.callbacks.History): The history object returned by model.fit().
+
+    Returns:
+        None
+    """
+    plt.rcParams.update({'font.size': 14})
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    ax.plot(history.history['accuracy'],
+            label='Train Accuracy', linewidth=2, color=color_loss)
+    ax.plot(history.history['val_accuracy'],
+            label='Validation Accuracy', linewidth=2, color=color_val)
+
+    ax.set_title('Model Accuracy', fontsize=20, fontweight='bold')
+    ax.set_xlabel('Epoch', fontsize=16, fontweight='bold')
+    ax.set_ylabel('Accuracy', fontsize=16, fontweight='bold')
+
+    ax.legend(fontsize=14)
+    ax.grid(axis='both', linestyle='--', alpha=0.6)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
+    ax.tick_params(axis='both', which='major', labelsize=14)
+    plt.show()
 
 
 def saveDatasets(X, Y, filename) -> None:
