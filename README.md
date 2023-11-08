@@ -38,12 +38,14 @@ project-root/
 ├── dataset/
 │ ├── wine_quality_X_test.npy
 │ ├── wine_quality_Y_test.npy
+│ ├── wine_quality_X_test_attacked_0.05.npy
+│ ├── ...
+│ ├── wine_quality_X_test_attacked_1.npy
 │ └── winequalityN.csv
 │
 ├── model/
-│ ├── wine_quality_classifier.h5
-│ └──
-│
+│ └── wine_quality_classifier.h5
+│ 
 ├── src/
 │ ├── adversarial_example_attack.ipynb
 │ ├── algorithms_comparison.py
