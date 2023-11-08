@@ -1,8 +1,6 @@
 import csv
 import numpy as np
-import seaborn as sns
 import matplotlib.pyplot as plt
-import tensorflow as tf
 
 text_to_float = np.vectorize(lambda x: float(x == 'red'))
 remove_empty = np.vectorize(lambda x: '0' if x == '' else x)
