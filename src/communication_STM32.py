@@ -43,8 +43,13 @@ def evaluate_model_on_STM32(iterations, serial_port):
 
 
 if __name__ == '__main__':
-    X_test, Y_test = np.load(
-        "./dataset/wine_quality_X_test.npy"), np.load("./dataset/wine_quality_Y_test.npy")
+    attack_model = False
+    budget = 0.1
+    if attack_model:
+        X_test = np.load(f"./dataset/wine_quality_X_test_attacked_{budget:.2f}.npy")
+    else:
+        X_test = np.load("./dataset/wine_quality_X_test.npy")
+    Y_test = np.load("./dataset/wine_quality_Y_test.npy")
 
     with serial.Serial(PORT, 115200, timeout=1) as ser:
         print("Synchronising...")
