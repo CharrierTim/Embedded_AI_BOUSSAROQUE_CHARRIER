@@ -109,7 +109,37 @@ To handle the dataset, we created a Python Class called `Dataset` that can be fo
 
 ### The model
 
+The model is a Multi-Layer Perceptron, with 12 inputs (one for each parameter). The hidden layers are the following:
+
+```text
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense (Dense)               (None, 20)                260       
+                                                                 
+ dropout (Dropout)           (None, 20)                0         
+                                                                 
+ dense_1 (Dense)             (None, 15)                315       
+                                                                 
+ dense_2 (Dense)             (None, 3)                 48        
+                                                                 
+=================================================================
+Total params: 623 (2.43 KB)
+Trainable params: 623 (2.43 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+```
+The output is a vector of size 3 (bad, average good) in one hot encoding.
+
 ### Communication with the STM32
+
+The communication with the STM32 is done via UART and made of several steps:
+
+- The laptop repeatdly sends 0xAB, waiting for the STM32 to answer 0xCD. Once this is done, the synchronization is complete and data can be sent.
+
+- The laptop sends 12 floats of 32 bits (48 bytes in total) which are all between -1 and 1 (as the data is normalized).
+
+- The STM32 processes the inputs and returns 3 floats. Each one corresponds the probability of the wine being bad, average, or good. The laptop picks the highest one and interprets it as the result.
 
 ## The C code for the AI implementation
 
@@ -290,10 +320,37 @@ python3 communication_STM32.py
 
 ## Adversarial attack on the classifier
 
-...
-...
-... TODO
-...
-...
+The adversarial attack is done with a 'white box' and follows the methdology described on the tensorflow website: https://www.tensorflow.org/tutorials/generative/adversarial_fgsm
+
+We start by computing the gradient of the loss at a the input we want to attack:
+
+```python
+loss_object = tf.keras.losses.CategoricalCrossentropy()
+
+def create_adversarial_pattern(input, label):
+  input_tensor = tf.convert_to_tensor(input.reshape(1, 12), dtype=tf.float32)
+  label_tensor = tf.convert_to_tensor(label.reshape(1, 3), dtype=tf.float32)
+  with tf.GradientTape() as tape:
+    tape.watch(input_tensor)
+    prediction = model(input_tensor)
+    loss = loss_object(label_tensor, prediction)
+
+  # Get the gradients of the loss w.r.t to the input image.
+  gradient = tape.gradient(loss, input_tensor)
+  # Get the sign of the gradients to create the perturbation
+  signed_grad = tf.sign(gradient)
+  return signed_grad
+```
+
+We define a budget (epsilon), then add the gradient to the input to create a biaised input:
+
+```python
+def create_adversarial_example(input, label, eps):
+  perturbations = create_adversarial_pattern(input, label)
+  adversarial_example = input + eps * perturbations
+  return adversarial_example
+```
+
+Using the above function, we create a series of attacked datasets, with different budgets. We evaluate the model on these datasets. As expected the accuracy decreases. It can be noticed that it goes below 33%, which means the model became worse than random guessing.
 
 ![Wine Quality Dataset Repartion](./img/effect_of_attack_budget_on_accuracy.png)
