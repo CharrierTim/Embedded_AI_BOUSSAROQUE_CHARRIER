@@ -82,10 +82,7 @@ Let's delve into the details of the model and the communication.
 ## Model
 
 ### The dataset
-
-...
-... TODO
-...
+The objective of the dataset is to evaluate the quality of a wine based on 12 criteria such as acidity, sugar, pH... The result is a score between 3 and 9 (out of 10). For better results, we reduced it to 3 categories: bad, average, and good.
 
 To handle the dataset, we created a Python Class called `Dataset` that can be found in `src/dataset_handling.py`. This class is used to load the dataset, format, split and augment it. Here is a UML diagram of the class:
 
