@@ -46,7 +46,7 @@ project-root/
 │
 ├── src/
 │ ├── adversarial_example_attack.ipynb
-| ├── algorithms_comparison.py
+│ ├── algorithms_comparison.py
 │ ├── communication_STM32.py
 │ ├── dataset_handling.py
 │ ├── wine_quality_classifier.ipynb
@@ -244,6 +244,8 @@ int post_process(ai_i8 *data[])
 
       // Reconstruct the float from the bytes
       outs[i] = *(float *)&temp;
+
+      // Convert the float to uint8_t for UART transmission
       outs_uint8[i] = (char)(outs[i] * 255);
     }
 
@@ -278,4 +280,18 @@ The classifier was performing as expected. The python model was able to predict 
 ----------------------- Accuracy: 0.67
 ```
 
+To reproduce these results, you can run the following command:
+
+```bash
+python3 communication_STM32.py
+```
+
 ## Adversarial attack on the classifier
+
+...
+...
+... TODO
+...
+...
+
+![Wine Quality Dataset Repartion](./img/effect_of_attack_budget_on_accuracy.png)
