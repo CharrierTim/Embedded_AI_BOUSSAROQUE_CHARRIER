@@ -82,7 +82,17 @@ Let's delve into the details of the model and the communication.
 ## Model
 
 ### The dataset
-The objective of the dataset is to evaluate the quality of a wine based on 12 criteria such as acidity, sugar, pH... The result is a score between 3 and 9 (out of 10). For better results, we reduced it to 3 categories: bad, average, and good.
+
+The objective of the dataset is to evaluate the quality of a wine based on 12 criteria such as acidity, sugar, pH... The result is a score between 3 and 9 (out of 10). But the dataset is not balanced, so we decided to reduce the number of categories. Here is the initial distribution of the scores:
+
+![Wine Quality Raw Dataset Repartion](./img/initial_label_distribution.png)
+
+
+For better results, we reduced it to 3 categories: bad, average, and good. Here is the new distribution:
+
+Located in the img/ folder
+![Wine Quality Dataset Repartion](./img/label_distribution_after_data_aug.png)
+
 
 To handle the dataset, we created a Python Class called `Dataset` that can be found in `src/dataset_handling.py`. This class is used to load the dataset, format, split and augment it. Here is a UML diagram of the class:
 
