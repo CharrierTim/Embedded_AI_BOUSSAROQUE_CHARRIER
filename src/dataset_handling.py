@@ -69,27 +69,36 @@ class Dataset:
         return X_train, X_test, Y_train, Y_test
 
     def data_augmentation(self, noise) -> None:
-        factors = [1.19, 1.19, 1.19, 1.0, 2.22, 2.22, 2.22]
-        samples = [self.data[self.data[:, -1] == i] for i in range(3, 10)]
-        number_of_samples = [s.shape[0] for s in samples]
-        samples_to_add = [int((f-1)*n)
-                          for f, n in zip(factors, number_of_samples)]
+            """
+            Applies data augmentation to the dataset by adding new samples with random noise.
 
-        def augment_scalar(x, noise):
-            return x + np.random.normal(0, noise)
+            Args:
+                noise (float): The standard deviation of the normal distribution used to generate the noise.
 
-        standard_deviations = [np.std(self.data[:, i]) for i in range(12)]
-        standard_deviations = [
-            s if s != np.inf else 0 for s in standard_deviations]
-        for i, n in enumerate(samples_to_add):
-            new_samples = np.zeros((n, 13))
-            for j in range(n):
-                base = samples[i][np.random.randint(0, number_of_samples[i])]
-                for k in range(12):
-                    new_samples[j, k] = max(augment_scalar(
-                        base[k], noise*standard_deviations[k]), 0)
-                new_samples[j, 12] = base[12]
-            self.data = np.concatenate((self.data, np.array(new_samples)))
+            Returns:
+                None
+            """
+            factors = [1.19, 1.19, 1.19, 1.0, 2.22, 2.22, 2.22]
+            samples = [self.data[self.data[:, -1] == i] for i in range(3, 10)]
+            number_of_samples = [s.shape[0] for s in samples]
+            samples_to_add = [int((f-1)*n)
+                              for f, n in zip(factors, number_of_samples)]
+
+            def augment_scalar(x, noise):
+                return x + np.random.normal(0, noise)
+
+            standard_deviations = [np.std(self.data[:, i]) for i in range(12)]
+            standard_deviations = [
+                s if s != np.inf else 0 for s in standard_deviations]
+            for i, n in enumerate(samples_to_add):
+                new_samples = np.zeros((n, 13))
+                for j in range(n):
+                    base = samples[i][np.random.randint(0, number_of_samples[i])]
+                    for k in range(12):
+                        new_samples[j, k] = max(augment_scalar(
+                            base[k], noise*standard_deviations[k]), 0)
+                    new_samples[j, 12] = base[12]
+                self.data = np.concatenate((self.data, np.array(new_samples)))
 
 
 def plot_label_distribution(x, y_tr, y_te, color_tr="blue", color_te="red", title="Wine Quality Label Distribution"):
