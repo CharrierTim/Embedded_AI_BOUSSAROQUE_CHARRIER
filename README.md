@@ -23,8 +23,8 @@
 
 ## Authors
 
-- [@CharrierTim](https://github.com/CharrierTim)
-- [@H3Aether](https://github.com/H3Aether)
+- [Timothée Charrier](https://github.com/CharrierTim)
+- [Alexis Boussaroque](https://github.com/H3Aether)
 
 ## Overview
 
@@ -213,11 +213,17 @@ We decided to convert to floats and multiply by 255 to get the probability in ui
 This is done using the following code:
 
 ```c
-  int post_process(ai_i8 *data[])
+int post_process(ai_i8 *data[])
   {
     //
     // Get the output data
     //
+
+    if (data == NULL)
+    {
+      printf("The output data is NULL.\n");
+      return (1);
+    }
 
     uint8_t *output = data;
 
@@ -245,14 +251,31 @@ This is done using the following code:
     // Transmit the output data
     //
 
-    HAL_UART_Transmit(&huart2, (uint8_t *)outs_uint8, sizeof(outs_uint8), TIMEOUT);
+    HAL_StatusTypeDef status = HAL_UART_Transmit(&huart2, (uint8_t *)outs_uint8, sizeof(outs_uint8), TIMEOUT);
+
+    // Check the return status of HAL_UART_Transmit
+    if (status != HAL_OK)
+    {
+      printf("Failed to transmit data to UART. Error code: %d\n", status);
+      return (1);
+    }
 
     return 0;
   }
 ```
+We also implemented an error handling function that will be called if the prediction fails due to a memory allocation error or a data acquisition error.
 
 Then, the PC can receive the prediction, convert it and compare it to the ground truth.
 
 ## Results of the classifier
+
+The classifier was performing as expected. The python model was able to predict the quality of the wine with an accuracy around 68%. The C code was able to predict the quality of the wine with pretty much the same accuracy. Here is the output accuracy and prediction of the classifier after 100 iterations:
+
+```bash	
+----- Iteration 100 -----
+   Expected output: [0 0 1]
+   Received output: [0.07058823529411765, 0.24705882352941178, 0.6745098039215687]
+----------------------- Accuracy: 0.67
+```
 
 ## Adversarial attack on the classifier
