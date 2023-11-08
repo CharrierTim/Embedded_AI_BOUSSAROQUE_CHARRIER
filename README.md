@@ -87,10 +87,10 @@ The objective of the dataset is to evaluate the quality of a wine based on 12 cr
 
 ![Wine Quality Raw Dataset Repartion](./img/initial_label_distribution.png)
 
+To deal with this problem, we decided to augment to the dataset by adding new samples with random noise to the existing ones. You can find our own implementation of this method in `src/dataset_handling.py`.
 
-For better results, we reduced it to 3 categories: bad, average, and good. Here is the new distribution:
+For better results, we also reduced to 3 categories: bad, average, and good. Here is the new distribution after the remapping and data augmentation:
 
-Located in the img/ folder
 ![Wine Quality Dataset Repartion](./img/label_distribution_after_data_aug.png)
 
 
