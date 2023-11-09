@@ -49,6 +49,7 @@ project-root/
 ├── src/
 │ ├── adversarial_example_attack.ipynb
 │ ├── algorithms_comparison.py
+│ ├── app_x-cube-ai.c
 │ ├── communication_STM32.py
 │ ├── dataset_handling.py
 │ ├── wine_quality_classifier.ipynb
