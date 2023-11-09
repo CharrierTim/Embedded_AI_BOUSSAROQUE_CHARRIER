@@ -10,7 +10,7 @@
   - [Prerequisites](#prerequisites)
   - [Getting Started](#getting-started)
     - [Installation](#installation)
-  - [Model](#model)
+  - [Wine Quality Prediction](#wine-quality-prediction-1)
     - [The dataset](#the-dataset)
     - [The model](#the-model)
     - [Communication with the STM32](#communication-with-the-stm32)
@@ -89,7 +89,7 @@ Follow these steps to set up and run the project:
 
 Let's delve into the details of the model and the communication.
 
-## Model
+## Wine Quality Prediction
 
 ### The dataset
 
