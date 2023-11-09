@@ -130,7 +130,8 @@ Trainable params: 623 (2.43 KB)
 Non-trainable params: 0 (0.00 Byte)
 _________________________________________________________________
 ```
-The output is a vector of size 3 (bad, average good) in one hot encoding.
+The output is a vector of size 3 (bad, average good) in one hot encoding. 
+The training can be found in `src/wine_quality_classifier.ipynb`.
 
 ### Communication with the STM32
 
