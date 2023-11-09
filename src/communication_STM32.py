@@ -5,6 +5,15 @@ PORT = "COM4"
 
 
 def synchronise_UART(serial_port):
+    """
+    Synchronizes the UART communication by sending a byte and waiting for a response.
+
+    Args:
+        serial_port (serial.Serial): The serial port object to use for communication.
+
+    Returns:
+        None
+    """
     while (1):
         serial_port.write(b"\xAB")
         ret = serial_port.read(1)
@@ -14,7 +23,17 @@ def synchronise_UART(serial_port):
 
 
 def send_inputs_to_STM32(inputs, serial_port):
-    inputs = inputs.astype(np.float32)  # Convert inputs to float16
+    """
+    Sends a numpy array of inputs to the STM32 microcontroller via a serial port.
+
+    Args:
+        inputs (numpy.ndarray): The inputs to send to the STM32.
+        serial_port (serial.Serial): The serial port to use for communication.
+
+    Returns:
+        None
+    """
+    inputs = inputs.astype(np.float32)
     buffer = b""
     for x in inputs:
         buffer += x.tobytes()
@@ -22,6 +41,15 @@ def send_inputs_to_STM32(inputs, serial_port):
 
 
 def read_output_from_STM32(serial_port):
+    """
+    Reads 3 bytes from the given serial port and returns a list of float values obtained by dividing each byte by 255.
+
+    Args:
+    serial_port: A serial port object.
+
+    Returns:
+    A list of float values obtained by dividing each byte by 255.
+    """
     output = serial_port.read(3)
 
     float_values = [int(out)/255 for out in output]
@@ -29,6 +57,16 @@ def read_output_from_STM32(serial_port):
 
 
 def evaluate_model_on_STM32(iterations, serial_port):
+    """
+    Evaluates the accuracy of a machine learning model on an STM32 device.
+
+    Args:
+        iterations (int): The number of iterations to run the evaluation for.
+        serial_port (Serial): The serial port object used to communicate with the STM32 device.
+
+    Returns:
+        float: The accuracy of the model, as a percentage.
+    """
     accuracy = 0
     for i in range(iterations):
         print(f"----- Iteration {i+1} -----")
