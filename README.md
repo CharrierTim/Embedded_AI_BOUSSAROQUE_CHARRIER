@@ -145,6 +145,8 @@ The communication with the STM32 is done via UART and made of several steps:
 
 Implementing this classifier was done using Cube-AI pakage. We have to provide the model in .h5 format and the input and validation data in .npy format. Then, we wrote a C code to synchronize the STM32, pre and post processing the data and finally, the prediction.
 
+The source code can be found in `src/app_x-cube-ai.c`.
+
 ### Syncronization
 
 The synchronization is done using a simple handshake. The STM32 sends a byte with the value 0xAB and waits for the PC to send back 0xCD. Once the PC receives the 0xAB byte, it sends back 0xCD and the synchronization is done.
@@ -353,4 +355,14 @@ def create_adversarial_example(input, label, eps):
 
 Using the above function, we create a series of attacked datasets, with different budgets. We evaluate the model on these datasets. As expected the accuracy decreases. It can be noticed that it goes below 33%, which means the model became worse than random guessing.
 
+Here is the accuracy of the model on the attacked datasets:
+
 ![Wine Quality Dataset Repartion](./img/effect_of_attack_budget_on_accuracy.png)
+
+To reproduce these results, you have to modify the `src/comminication_STM32.py` file and set the `attack_model` variable to `True` and set the `bugdet` variable to one of the following values: 0.05, 0.10, 0.20, 0.30, 0.50, 0.80 and 1.00.
+
+Then, you can run the following command:
+
+```bash
+python3 communication_STM32.py
+```
